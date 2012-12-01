@@ -1,6 +1,6 @@
 <?php
 
-namespace PinCrowd\Api\ScoringBundle\Tests\Controller;
+namespace PinCrowd\ApiBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
