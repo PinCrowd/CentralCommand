@@ -1,0 +1,16 @@
+pin_crowd_kiosk:
+    resource: "@PinCrowdKioskBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
+pincrowd_api_scoring:
+    pattern:   /score/
+    defaults:  { _controller: PinCrowdApiScoringBundle:Scoring:getScore, _format: json, _locale: en }
+    requirements:
+      _method:  GET
+      _format: JSON
+
+# Internal routing configuration to handle ESI
+#_internal:
+#    resource: "@FrameworkBundle/Resources/config/routing/internal.xml"
+#    prefix:   /_internal
