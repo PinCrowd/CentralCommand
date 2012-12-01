@@ -1,3 +1,5 @@
+app/cache
+app/logs
 composer.lock
 .DS_Store
 vendor
