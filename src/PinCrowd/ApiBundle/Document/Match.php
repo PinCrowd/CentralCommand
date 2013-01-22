@@ -30,7 +30,7 @@ class Match
     /**
      * @var array[Game]
      *
-     * @MongoDB\ReferenceMany(targetDocument="Game")
+     * @MongoDB\ReferenceMany(targetDocument="Game", cascade="{remove}")
      */
     protected $games = array();
 

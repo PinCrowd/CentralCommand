@@ -38,25 +38,10 @@ class DefaultController extends Controller
             print_r($e->getMessage());
         }
 
-        switch ($values['cmd']) {
-            case 'newMatch':
-                $response = $this->forward(
-                    'PincrowdApiBundle:Default:newMatch',
-                    array('values' => $values['data'])
-                );
-                break;
-            case 'getScores':
-                $response = $this->forward(
-                    'PincrowdApiBundle:Default:getScores',
-                    array('values' => $values['data'])
-                );
-            case 'deleteGame':
-                $response = $this->forward(
-                    'PincrowdApiBundle:Default:deleteGame',
-                    array('values' => $values['data'])
-                );
-                break;
-        }
+        $response = $this->forward(
+            "PincrowdApiBundle:Default:".$values['cmd'],
+            array('values' => $values['data'])
+        );
 
         return $response;
     }
@@ -88,6 +73,7 @@ class DefaultController extends Controller
 
         $lane = $dm->getRepository('PincrowdApiBundle:Lane')
                    ->findOneById($values['laneId']);
+        $lane->setMatch($match);
         $match->setLane($lane);
         $games = $gamesResponse = array();
 
@@ -130,7 +116,7 @@ class DefaultController extends Controller
         $laneId = $values['laneId'];
         $lane = $dm->getRepository('PincrowdApiBundle:Lane')
                    ->findOneById($laneId);
-        $games = $lane->getGames();
+        $games = $lane->getMatch()->getGames();
         $scores = array();
         foreach ($games as $game) {
             $scores[$game->getId()] = $game->getFrames();
@@ -149,12 +135,73 @@ class DefaultController extends Controller
         $game = $dm->getRepository('PincrowdApiBundle:Game')
                    ->findOneById($values['gameId']);
         if ($game) {
+            $game->getMatch()->getGames()->removeElement($game);
             $dm->remove($game);
             $dm->flush();
             return new Response('game deleted');
         } else {
             return new Response('game not found');
         }
+    }
 
+    /**
+     * @Route("/addGame/{values}")
+     */
+    public function addGameAction($values)
+    {
+        $dm   = $this->get('doctrine_mongodb')->getManager();
+        $lane = $dm->getRepository('PincrowdApiBundle:Lane')
+                   ->findOneById($values['laneId']);
+
+        $game = new Game();
+        $game->setUsername($values['name'])
+             ->setLaneId($lane)
+             ->setScore(0)
+             ->setMatch($lane->getMatch())
+             ->setDateStarted(date('Y-m-d H:i:s'))
+             ->setActive(false);
+        $dm->persist($game);
+        $dm->flush();
+        $lane->getMatch()->addGames($game);
+        $dm->flush();
+
+        return new Response(
+            json_encode(array('id' => $game->getId()))
+        );
+    }
+
+    /**
+     * @Route("/editScore/{values}")
+     */
+    public function editScoreAction($values)
+    {
+        $dm   = $this->get('doctrine_mongodb')->getManager();
+        $game = $dm->getRepository('PincrowdApiBundle:Game')
+                   ->findOneById($values['gameId']);
+        if ($game) {
+            $game->editScore($values['frame'], $values['throw'], $values['score']);
+            $dm->flush();
+            return new Response(json_encode($game->getFrames()));
+        } else {
+            return new Response('game not found');
+        }
+
+    }
+
+    /**
+     * @Route("/editPlayer/{values}")
+     */
+    public function editPlayerAction($values)
+    {
+        $dm = $this->get('doctrine_mongodb')->getManager();
+        $game = $dm->getRepository('PincrowdApiBundle:Game')
+                   ->findOneById($values['gameId']);
+        if ($game) {
+            $game->setUsername($values['name']);
+            $dm->flush();
+            return new Response('player edited');
+        } else {
+            return new Response('game not found');
+        }
     }
 }

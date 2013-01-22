@@ -115,7 +115,7 @@ class Game
                 } else {
                     $throw = array($throws[$i]);
                     if(isset($throws[$i + 1])){
-                        arraypush($throw,$throws[$i + 1]);
+                        array_push($throw,$throws[$i + 1]);
                     }
                     if($throws[$i + 1] == '/' && isset($throws[$i + 2])){
                         $score = 10 + $this->getValue($throws[$i + 2]);
@@ -132,10 +132,10 @@ class Game
             } elseif($f == 10){
                 $throw = array($throws[$i]);
                 if(isset($throws[$i + 1])){
-                    arraypush($throw,$throws[$i + 1]);
+                    array_push($throw,$throws[$i + 1]);
                 }
                 if(isset($throws[$i + 2])){
-                    arraypush($throw,$throws[$i + 2]);
+                    array_push($throw,$throws[$i + 2]);
                 }
                 if(isset($throws[$i + 1]) && isset($throws[$i + 2])){
                     $score = 10 + $this->getValue($throws[$i + 1]) + $this->getValue($throws[$i + 2]);
@@ -194,11 +194,25 @@ class Game
                     'pinfall' => null
                 );
             }
-            $this->frames[$i] = $frame;
+            $this->addFrames($frame);
         }
         return $this;
     }
 
+    /**
+     * Edit Score
+     *
+     * @param integer $frame
+     * @param integer $throw
+     * @param integer $score
+     *
+     */
+    public function editScore($frame, $throw, $score)
+    {
+        $this->frames[$frame]['throw'.$throw]['value'] = $score;
+        $this->frames[$frame]['throw'.$throw]['edited'] = true;
+        return $this->frames;
+    }
 
     /**
      * Set laneId
@@ -417,4 +431,16 @@ class Game
         return $this;
     }
 
+
+    /**
+     * Set throws
+     *
+     * @param hash $throws
+     * @return \Game
+     */
+    public function setThrows($throws)
+    {
+        $this->throws = $throws;
+        return $this;
+    }
 }
