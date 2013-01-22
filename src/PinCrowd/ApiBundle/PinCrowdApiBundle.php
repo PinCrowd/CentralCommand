@@ -1,9 +1,9 @@
 <?php
 
-namespace PinCrowd\ApiBundle;
+namespace Pincrowd\ApiBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class PinCrowdApiBundle extends Bundle
+class PincrowdApiBundle extends Bundle
 {
 }

@@ -1,10 +1,5 @@
-pin_crowd_api:
-    resource: "@PinCrowdApiBundle/Controller/"
-    type:     annotation
-    prefix:   /
-
-pin_crowd_kiosk:
-    resource: "@PinCrowdKioskBundle/Controller/"
+pincrowd_api:
+    resource: "@PincrowdApiBundle/Controller/"
     type:     annotation
     prefix:   /
 

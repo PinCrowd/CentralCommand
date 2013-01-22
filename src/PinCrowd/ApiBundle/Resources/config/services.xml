@@ -6,11 +6,11 @@
 
     <!--
     <parameters>
-        <parameter key="pin_crowd_api.example.class">PinCrowd\ApiBundle\Example</parameter>
+        <parameter key="pincrowd_api.example.class">Pincrowd\ApiBundle\Example</parameter>
     </parameters>
 
     <services>
-        <service id="pin_crowd_api.example" class="%pin_crowd_api.example.class%">
+        <service id="pincrowd_api.example" class="%pincrowd_api.example.class%">
             <argument type="service" id="service_id" />
             <argument>plain_value</argument>
             <argument>%parameter_name%</argument>
