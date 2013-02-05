@@ -1,0 +1,1 @@
+Pincrowd.Model.Match = Backbone.Model.extend({});

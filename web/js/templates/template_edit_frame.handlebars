@@ -1,0 +1,24 @@
+<div id="edit-frame" class="modal">
+    <div class="title">{{playerName}} - Edit Frame {{frameNum}}</div>
+    <div class="throw-inputs {{#if isTen}}wide{{/if}}">
+        <div class="throw-input one">
+            <label for="edit-throw-one" class="throw-title">Throw 1</label>
+            <input id="edit-throw-one" type="text" value="{{frame.throw.one.value}}" maxlength="1" />
+        </div>
+        <div class="throw-input two">
+            <label for="edit-throw-two" class="throw-title">Throw 2</label>
+            <input id="edit-throw-two" type="text" value="{{frame.throw.two.value}}" maxlength="1" />
+        </div>
+        {{#if isTen}}
+        <div class="throw-input three">
+            <label for="edit-throw-three" class="throw-title">Throw 3</label>
+            <input id="edit-throw-three" type="text" value="{{frame.throw.three.value}}" maxlength="1" />
+        </div>
+        {{/if}}
+    </div>
+    <div class="save-control">
+        <span class="save">SAVE</span>
+        <span class="cancel">CANCEL</span>
+    </div>
+    <div class="close">CLOSE</div>
+</div>
