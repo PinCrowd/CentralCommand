@@ -1,0 +1,11 @@
+<div id="edit-player" class="modal">
+    <div class="edit-name">
+        <label for="edit-player-name">Edit Name:</label><br />
+        <input id="edit-player-name" type="text" value="{{player.name}}" /><span class="save">SAVE</span>
+    </div>
+    {{#if isCurrentGame}}
+    <div class="skip-player">Skip Player</div>
+    {{/if}}
+    <div class="remove-player">Remove Player</div>
+    <div class="close">CLOSE</div>
+</div>

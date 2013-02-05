@@ -46,6 +46,15 @@ class DefaultController extends Controller
         return $response;
     }
 
+    /**
+     * @Route("/hello/")
+     * @Method({"GET"})
+     */
+    public function helloAction()
+    {
+        return new Response(json_encode(array('howdy' => 'hi')));
+
+    }
 
     /**
      * @Route("/createLane/")
