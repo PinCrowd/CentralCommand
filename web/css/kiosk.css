@@ -1,0 +1,222 @@
+html,
+body {
+  margin: 0px;
+  padding: 0px;
+}
+body {
+  background-color: #666;
+  font-family: 'Open Sans', Helvetica, Arial, sans-serif;
+  position: relative;
+}
+div {
+  outline: none;
+}
+#emulate-kiosk {
+  position: relative;
+  margin: 0px auto;
+  width: 1280px;
+  height: 750px;
+  background-color: #fff;
+  overflow: hidden;
+  background-image: url('../images/png/kiosk_layout_01-scoreboard_blank.png');
+}
+#splash {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 1280px;
+  height: 800px;
+  background-image: url('../images/png/kiosk_layout_01-splash.png');
+  cursor: pointer;
+}
+#games {
+  position: relative;
+  margin-top: 60px;
+  overflow: auto;
+}
+#games .game {
+  width: 1280px;
+  height: 115px;
+  border-bottom: 1px solid #999;
+  background-color: rgba(250, 250, 250, 0.7);
+}
+#games .game:first-child {
+  border-top: 1px solid #999;
+}
+#games .game.currentGame {
+  background-color: #FFF;
+}
+#games .game .player,
+#games .game .frames {
+  float: left;
+}
+#games .game .player {
+  width: 260px;
+  height: 115px;
+  cursor: pointer;
+}
+#games .game .player .avatar,
+#games .game .player .name {
+  float: left;
+}
+#games .game .player .avatar {
+  overflow: hidden;
+  margin-left: 8px;
+  margin-top: 15px;
+  width: 80px;
+  height: 80px;
+  border: 3px solid #CCC;
+  -webkit-border-radius: 45px;
+  -moz-border-radius: 45px;
+  border-radius: 45px;
+}
+#games .game .player .name {
+  margin-top: 38px;
+  margin-left: 10px;
+  font-size: 30px;
+}
+#games .game .frames {
+  width: 1020px;
+  height: 115px;
+}
+#games .game .frames .frame {
+  float: left;
+  width: 99px;
+  height: 115px;
+  border-left: 1px solid #CCC;
+  text-align: center;
+  color: #666;
+}
+#games .game .frames .frame.edited {
+  background-color: #FFFFCC;
+}
+#games .game .frames .frame .throw,
+#games .game .frames .frame .total {
+  float: left;
+}
+#games .game .frames .frame .throw {
+  width: 50px;
+  height: 41px;
+  border-left: 1px solid #CCC;
+  border-bottom: 1px solid #CCC;
+  font-size: 30px;
+}
+#games .game .frames .frame .throw:first-child {
+  width: 48px;
+  border: 0px;
+}
+#games .game .frames .frame .total {
+  width: 99px;
+  font-size: 50px;
+}
+#games .game .frames .frame:nth-child(10) {
+  width: 119px;
+}
+#games .game .frames .frame:nth-child(10) .throw {
+  width: 39px;
+}
+#games .game .frames .frame:nth-child(10) .throw:first-child {
+  width: 39px;
+}
+#games .game .frames .frame:nth-child(10) .total {
+  width: 119px;
+}
+.modal {
+  position: absolute;
+  top: 120px;
+  left: 230px;
+  z-index: 1000;
+  width: 820px;
+  height: 420px;
+  border: 7px solid #333;
+  background-color: #FFF;
+}
+.modal .title {
+  padding: 10px;
+  font-size: 40px;
+  background-color: #B90504;
+  color: #FFF;
+  text-align: center;
+}
+.modal .save,
+.modal .cancel {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 0px 10px;
+  line-height: 88px;
+  font-size: 60px;
+  color: #333;
+  background-color: #FFCC00;
+  cursor: pointer;
+}
+.modal .cancel {
+  background-color: #666;
+  color: #FFF;
+}
+.modal .close {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+#edit-frame .throw-inputs {
+  overflow: auto;
+  width: 270px;
+  margin: 0px auto;
+}
+#edit-frame .throw-inputs.wide {
+  width: 405px;
+}
+#edit-frame .throw-inputs .throw-input {
+  float: left;
+  margin: 10px;
+  text-align: center;
+}
+#edit-frame .throw-inputs .throw-input label {
+  display: block;
+  text-align: center;
+  font-size: 25px;
+}
+#edit-frame .throw-inputs .throw-input input[type='text'] {
+  display: block;
+  width: 100px;
+  font-size: 100px;
+  text-align: center;
+}
+#edit-frame .save-control {
+  padding-top: 15px;
+  text-align: center;
+}
+#edit-player label {
+  color: #666;
+  font-size: 23px;
+}
+#edit-player #edit-player-name {
+  display: inline-block;
+  width: 520px;
+  height: 86px;
+  border: 1px solid #CCC;
+  padding-left: 10px;
+  line-height: 86px;
+  font-size: 60px;
+}
+#edit-player .edit-name {
+  width: 752px;
+  margin: 20px auto 40px;
+}
+#edit-player .skip-player,
+#edit-player .remove-player {
+  width: 570px;
+  height: 86px;
+  margin: 30px auto;
+  line-height: 86px;
+  font-size: 60px;
+  color: #333;
+  background-color: #FFCC00;
+  text-align: center;
+  cursor: pointer;
+}
+#edit-player .remove-player {
+  background-color: #B90504;
+  color: #FFF;
+}
