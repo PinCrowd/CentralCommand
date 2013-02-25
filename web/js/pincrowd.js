@@ -1,5 +1,6 @@
 var Pincrowd = {
     'Model': {},
     'View': {},
-    'Collection': {}
+    'Collection': {},
+    'EventHub': {}
 };

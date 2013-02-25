@@ -2,6 +2,9 @@ Pincrowd.View.EditFrame = Backbone.View.extend({
     template: Handlebars.templates.template_edit_frame,
     frameNum: null,
     $frame: null,
+    throwOneAjax: {},
+    throwTwoAjax: {},
+    throwThreeAjax: {},
 
     events: {
         "tap .close, cancel": "remove",
@@ -20,7 +23,7 @@ Pincrowd.View.EditFrame = Backbone.View.extend({
         var frames = this.model.get('frames');
         var frame = frames[this.frameNum];
         var data = {
-            'playerName': this.model.get('player').name,
+            'playerName': this.model.get('player').username,
             'frameNum': this.frameNum,
             'frame': frame,
             'isTen': (this.frameNum == 10)
@@ -30,41 +33,84 @@ Pincrowd.View.EditFrame = Backbone.View.extend({
     },
 
     save: function(options) {
+        var _this = this;
         var frames = this.model.get('frames');
-        if (frames[this.frameNum] === undefined) {
-            frames[this.frameNum] = {
-                'score': 0,
-                'throw': {
-                    'one': {'value': '', 'pinfall': '', 'edited': 0},
-                    'two': {'value': '', 'pinfall': '', 'edited': 0}
-                },
-                'total': 0
-            };
 
-            if(this.frameNum == 10){
-                frames[this.frameNum]["throw"].three = {'value': '', 'pinfall': '', 'edited': 0};
+        function myData() {
+            return {
+                "cmd":"editScore",
+                "data": {
+                            "gameId": _this.model.id,
+                            "frame": _this.frameNum,
+                            "throw": 1,
+                            "score": 0
+                        }
+            }
+        };
+
+        function ajaxDefault() {
+            return {
+                type: 'post',
+                url: '/app_dev.php/endpoint/',
+                processData: true,
+                data: JSON.stringify(myData),
+                dataType: "json",
+                success: function(data){
+                    // nothin
+                },
+                error: function(xhr, type){
+                    console.log('frame edit error');
+                }
+            }
+        };
+
+        // Throw 1
+        var throwOneData = myData();
+        throwOneData.data.score = parseInt(this.$el.find('#edit-throw-one').val(), 10);
+
+        this.throwOneAjax = ajaxDefault();
+        this.throwOneAjax.data = JSON.stringify(throwOneData);
+
+        //$.ajax(this.throwOneAjax);
+
+
+        // Throw 2
+        var throwTwoData = myData();
+        throwTwoData.data.throw = 2;
+        throwTwoData.data.score = parseInt(this.$el.find('#edit-throw-two').val(), 10);
+
+        this.throwTwoAjax = ajaxDefault();
+        this.throwTwoAjax.data = JSON.stringify(throwTwoData);
+
+        //$.ajax(throwTwoAjax);
+
+
+        // Throw 3
+        if (this.frameNum == 10) {
+            var throwThreeData = myData();
+            throwThreeData.data.throw = 3;
+            throwThreeData.data.score = parseInt(this.$el.find('#edit-throw-three').val(), 10);
+
+            this.throwThreeAjax = ajaxDefault();
+            this.throwThreeAjax.data = JSON.stringify(throwThreeData);
+
+            //$.ajax(throwThreeAjax);
+        }
+
+
+        this.throwOneAjax.success = function(data){
+            $.ajax(_this.throwTwoAjax);
+            //console.log(_this.throwTwoAjax);
+        }
+
+        if(this.frameNum == 10){
+            this.throwTwoAjax.success = function(data){
+                $.ajax(_this.throwThreeAjax);
             }
         }
 
-        frames[this.frameNum]["throw"].one.value  = parseInt(this.$el.find('#edit-throw-one').val(), 10);
-        frames[this.frameNum]["throw"].one.edited = 1;
-        frames[this.frameNum]["throw"].two.value  = parseInt(this.$el.find('#edit-throw-two').val(), 10);
-        frames[this.frameNum]["throw"].two.edited = 1;
+        $.ajax(this.throwOneAjax);
 
-        var sum = frames[this.frameNum]["throw"].one.value + frames[this.frameNum]["throw"].two.value;
-
-        if (this.frameNum == 10) {
-            frames[this.frameNum]["throw"].three.value = parseInt(this.$el.find('#edit-throw-three').val(), 10);
-            frames[this.frameNum]["throw"].three.edited = 1;
-            sum += frames[this.frameNum]["throw"].three.value;
-        }
-
-        var oldTotal = frames[this.frameNum].total;
-        frames[this.frameNum].total = sum;
-        frames[this.frameNum].score = frames[this.frameNum].score - oldTotal + sum;
-        frames[this.frameNum].edited = 1;
-
-        this.model.setFrames(frames);
         this.remove();
     }
 

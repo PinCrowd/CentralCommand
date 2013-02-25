@@ -34,6 +34,11 @@ class Game
     protected $match;
     /**
      * @var
+     * @MongoDB\ReferenceOne(targetDocument="User")
+     */
+    protected $user;
+    /**
+     * @var
      * @MongoDB\Field(type="string")
      */
     protected $username;
@@ -106,7 +111,7 @@ class Game
                         } else {
                             $score = $score + $this->getValue($throws[$i + 2]) ;
                         }
-                        $frames[] = array(
+                        $frames[$f] = array(
                             'frame' => $f,
                             'throw' => array('X'),
                             'score' => $score
@@ -122,7 +127,7 @@ class Game
                     } elseif(isset($throws[$i + 1])) {
                         $score = $this->getValue($throws[$i + 1]);
                     }
-                    $frames[] = array(
+                    $frames[$f] = array(
                         'frame' => $f,
                         'throw' => $throw,
                         'score' => $score
@@ -140,7 +145,7 @@ class Game
                 if(isset($throws[$i + 1]) && isset($throws[$i + 2])){
                     $score = 10 + $this->getValue($throws[$i + 1]) + $this->getValue($throws[$i + 2]);
                 }
-                $frames[] = array(
+                $frames[$f] = array(
                     'frame' => $f,
                     'throw' => $throw,
                     'score' => $score
@@ -194,7 +199,7 @@ class Game
                     'pinfall' => null
                 );
             }
-            $this->addFrames($frame);
+            $this->addFrames($frame, $i);
         }
         return $this;
     }
@@ -259,6 +264,28 @@ class Game
     }
 
     /**
+     * Set user
+     *
+     * @param Pincrowd\ApiBundle\Document\User $user
+     * @return \Game
+     */
+    public function setUser(\Pincrowd\ApiBundle\Document\User $user)
+    {
+        $this->user = $user;
+        return $this;
+    }
+
+    /**
+     * Get user
+     *
+     * @return Pincrowd\ApiBundle\Document\User $user
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
      * Set username
      *
      * @param string $username
@@ -285,9 +312,9 @@ class Game
      *
      * @param $frames
      */
-    public function addFrames($frames)
+    public function addFrames($frames, $i)
     {
-        $this->frames[] = $frames;
+        $this->frames[$i] = $frames;
     }
 
     /**
