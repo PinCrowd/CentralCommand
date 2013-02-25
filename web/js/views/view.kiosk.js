@@ -22,9 +22,82 @@ Pincrowd.View.Kiosk = Backbone.View.extend({
         // init games collection
         this.games = new Pincrowd.Collection.Games();
 
-        this.pollCentralCommand();
+        Pincrowd.EventHub = _.clone(Backbone.Events);
+
+
+        window.eventTick = window.setInterval(function(){
+            Pincrowd.EventHub.trigger('tick');
+        }, 5000);
+
+
+        //this.pollCentralCommand();
+        this.fetchMatch();
 
     },
+
+    fetchMatch: function(options) {
+        var _this = this;
+        var myData = {
+                        "cmd":"newMatch",
+                        "data":{
+                            "laneId":"5119047177e9deac0b000001",
+                            "gameCount":2
+                        }
+                    };
+        $.ajax({
+            type: 'post',
+            url: '/app_dev.php/endpoint/',
+            processData: true,
+            data: JSON.stringify(myData),
+            dataType: "json",
+            success: function(data){
+                _this.games.reset(data.games);
+
+                _.each(data.games, function(game){
+                    _this.gameOrder.push(game.id);
+                    if(game.active){
+                        _this.currentGame = game.id;
+                    }
+                });
+
+                console.log(_this.gameOrder);
+                console.log(_this.currentGame);
+
+                console.log(_this.games.toJSON());
+
+                _this.createGames();
+
+
+
+            },
+            error: function(xhr, type){
+                console.log('check for games ajax error');
+                console.log(xhr);
+                console.log(type);
+                //_this.pollCentralCommand();
+            }
+        });
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     getCurrentGame: function() {
         return this.currentGame;
@@ -43,6 +116,19 @@ Pincrowd.View.Kiosk = Backbone.View.extend({
         this.gameViews[this.currentGame].isCurrentGame(true);
 
     },
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     pollCentralCommand: function(options) {
         var _this = this;

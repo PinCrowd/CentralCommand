@@ -21,7 +21,7 @@ Pincrowd.View.Game = Backbone.View.extend({
         this.$container = options.hasOwnProperty('container') ? options.container : this.$container;
         this.kiosk = options.hasOwnProperty('kiosk') ? options.kiosk : null;
 
-        this.model.on("change:name", this.updateName, this);
+        this.model.on("change:username", this.updateName, this);
         this.model.on("change:frames", this.renderGame, this);
 
         this.renderGame();
@@ -33,7 +33,8 @@ Pincrowd.View.Game = Backbone.View.extend({
             this.$el = $(this.template(this.model.toJSON()));
             this.$container.append(this.$el);
         } else {
-            console.log('refresh game');
+            console.log('refresh game ' + this.model.id);
+            console.log(this.model);
             this.$el.html($(this.template(this.model.toJSON())).html());
         }
 
@@ -44,7 +45,8 @@ Pincrowd.View.Game = Backbone.View.extend({
     },
 
     updateName: function(options) {
-        this.$el.find(".player .name").html(this.model.get('player').name);
+        console.log(this.model.get('player'));
+        this.$el.find(".player .name").html(this.model.get('player').username);
     },
 
     isCurrentGame: function(isCurrent) {

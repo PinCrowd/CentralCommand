@@ -16,8 +16,13 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 class User
 {
     /**
+     * @var $mixed
+     * @MongoDB\Id
+     */
+    protected $id;
+    /**
      * @var string
-     * @MongoDB\Id(strategy="NONE")
+     * @MongoDB\Field(type="string")
      */
     protected $username;
 
@@ -32,6 +37,12 @@ class User
      * @MongoDB\Field(type="string")
      */
     protected $lastname;
+
+    /**
+     * @var string
+     * @MongoDB\Field(type="string")
+     */
+    protected $avatar;
 
     /**
      * @var array
@@ -50,9 +61,19 @@ class User
     }
 
     /**
+     * Get id
+     *
+     * @return id $id
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * Set username
      *
-     * @param custom_id $username
+     * @param string $username
      * @return \User
      */
     public function setUsername($username)
@@ -64,7 +85,7 @@ class User
     /**
      * Get username
      *
-     * @return custom_id $username
+     * @return string $username
      */
     public function getUsername()
     {
@@ -113,6 +134,28 @@ class User
     public function getLastname()
     {
         return $this->lastname;
+    }
+
+    /**
+     * Set avatar
+     *
+     * @param string $avatar
+     * @return \User
+     */
+    public function setAvatar($avatar)
+    {
+        $this->avatar = $avatar;
+        return $this;
+    }
+
+    /**
+     * Get avatar
+     *
+     * @return string $avatar
+     */
+    public function getAvatar()
+    {
+        return $this->avatar;
     }
 
     /**
