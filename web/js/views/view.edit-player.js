@@ -27,8 +27,31 @@ Pincrowd.View.EditPlayer = Backbone.View.extend({
     },
 
     saveName: function(options) {
+        var _this = this;
         var name = this.$el.find('#edit-player-name').val();
-        this.model.setName(name);
+        //this.model.setUsername(name);
+
+        var myData = {
+            "cmd":"editPlayer",
+            "data": {
+                        "gameId": _this.model.id,
+                        "name": name
+                    }
+            };
+        $.ajax({
+            type: 'post',
+            url: '/app_dev.php/endpoint/',
+            processData: true,
+            data: JSON.stringify(myData),
+            dataType: "json",
+            success: function(data){
+                // nothin
+            },
+            error: function(xhr, type){
+                console.log('edit player name error');
+            }
+        });
+
         this.remove();
     },
 

@@ -88,7 +88,16 @@ class DefaultController extends Controller
 
         for ($i=1; $i<=$values['gameCount']; $i++) {
             $game = new Game();
-            $game->setUsername('Player '.$i)
+            $user = new User();
+            $user->setUsername('Player '.$i)
+                 ->setAvatar('/images/png/avatar_sean_connery.png');
+
+            $dm->persist($user);
+            $dm->flush();
+
+
+            $game->setUsername($user->getUsername())
+                 ->setUser($user)
                  ->setLaneId($lane)
                  ->setScore(0)
                  ->setMatch($match)
@@ -97,6 +106,7 @@ class DefaultController extends Controller
             if ($i == 1) $game->setActive(true);
             $games[] = $game;
             $dm->persist($game);
+            $dm->flush();
         }
 
         $dm->flush();
@@ -105,14 +115,26 @@ class DefaultController extends Controller
             $match->addGames($game);
             $gamesResponse[] = array(
                 'id'     => $game->getId(),
-                'name'   => $game->getUsername(),
-                'active' => $game->getActive()
+                'player' => array("id"          => $game->getUser()->getId(),
+                                  "username"    => $game->getUser()->getUsername(),
+                                  "avatar"      => $game->getUser()->getAvatar(),
+                            ),
+                'active' => $game->getActive(),
+                'frames' => $game->getFrames()
             );
         }
         $match->setCurrentPlayer($games[0]->getId());
         $dm->flush();
 
-        return new Response(json_encode($gamesResponse));
+
+        $response = array();
+        $response["laneId"] = $match->getLane()->getId();
+        $response["matchId"] = $match->getId();
+        $response["games"] = $gamesResponse;
+
+
+
+        return new Response(json_encode($response));
 
     }
 
@@ -179,6 +201,38 @@ class DefaultController extends Controller
         );
     }
 
+
+    /**
+     * @Route("/getGame/{values}")
+     * @Method({"POST"})
+     */
+    public function getGameAction($values)
+    {
+        $dm   = $this->get('doctrine_mongodb')->getManager();
+        $game = $dm->getRepository('PincrowdApiBundle:Game')
+                   ->findOneById($values['gameId']);
+
+        if ($game) {
+            // TODO: why the hell is getUsername returning the ID ???
+            $user = $dm->getRepository('PincrowdApiBundle:User')
+                   ->findOneById($game->getUser()->getUsername());
+
+            $gamesResponse = array(
+                'id'     => $game->getId(),
+                'player' => array("id"          => $user->getId(),
+                                  "username"    => $user->getUsername(),
+                                  "avatar"      => $user->getAvatar(),
+                            ),
+                'active' => $game->getActive(),
+                'frames' => $game->getFrames()
+            );
+            return new Response(json_encode($gamesResponse));
+        } else {
+            return new Response('game not found');
+        }
+    }
+
+
     /**
      * @Route("/editScore/{values}")
      */
@@ -207,8 +261,14 @@ class DefaultController extends Controller
                    ->findOneById($values['gameId']);
         if ($game) {
             $game->setUsername($values['name']);
+
+            $user = $dm->getRepository('PincrowdApiBundle:User')
+                   ->findOneById($game->getUser()->getUsername());
+
+            $user->setUsername($values['name']);
+
             $dm->flush();
-            return new Response('player edited');
+            return new Response(json_encode( array("msg"=>"player edited") ));
         } else {
             return new Response('game not found');
         }
