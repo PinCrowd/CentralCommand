@@ -16,15 +16,6 @@ use Pincrowd\ApiBundle\Document\User;
 class DefaultController extends Controller
 {
     /**
-     * @Route("/test/foo/{name}")
-     * @Template()
-     */
-    public function indexAction($name)
-    {
-        return array('name' => $name);
-    }
-
-    /**
      * @Route("/endpoint/")
      * @Method({"POST"})
      */
@@ -44,16 +35,6 @@ class DefaultController extends Controller
         );
 
         return $response;
-    }
-
-    /**
-     * @Route("/hello/")
-     * @Method({"GET"})
-     */
-    public function helloAction()
-    {
-        return new Response(json_encode(array('howdy' => 'hi')));
-
     }
 
     /**
@@ -150,7 +131,11 @@ class DefaultController extends Controller
         $games = $lane->getMatch()->getGames();
         $scores = array();
         foreach ($games as $game) {
-            $scores[$game->getId()] = $game->getFrames();
+            $scores[$game->getId()] = array(
+                'totalScore' => $game->getScore(),
+                'frames'     => $game->getFrames(),
+                'active'     => $game->getActive()
+            );
         }
 
         return new Response(json_encode($scores));
@@ -272,5 +257,49 @@ class DefaultController extends Controller
         } else {
             return new Response('game not found');
         }
+    }
+
+    /**
+     * @Route("/updateScore/{values}")
+     */
+    public function updateScoresAction($values)
+    {
+        $dm = $this->get('doctrine_mongodb')->getManager();
+        $game = $dm->getRepository('PincrowdApiBundle:Game')
+                   ->findOneById($values['gameId']);
+
+        $score = $game->buildFrames($game->getThrows());
+        return new Response(json_encode($score));
+    }
+
+    /**
+     * @Route("/addThrow/{values}")
+     */
+    public function addThrowsAction($values)
+    {
+        $dm = $this->get('doctrine_mongodb')->getManager();
+        $game = $dm->getRepository('PincrowdApiBundle:Game')
+                   ->findOneById($values['gameId']);
+
+        $game->addThrows($values['throws']);
+
+        $game->setActive(true);
+        $score = $game->calculateScore();
+
+        // Change current player if this frame is finished
+        if (!$game->getActive()) {
+            $match = $game->getMatch();
+            $match->setNextPlayerActive();
+            $dm->persist($match);
+
+            $activeGame = $dm->getRepository('PincrowdApiBundle:Game')
+                             ->findOneById($match->getCurrentPlayer());
+            $activeGame->setActive(true);
+
+        }
+
+        $dm->flush();
+
+        return new Response(json_encode($score));
     }
 }
