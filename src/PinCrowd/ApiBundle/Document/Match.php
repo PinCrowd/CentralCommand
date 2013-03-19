@@ -128,4 +128,31 @@ class Match
 
     }
 
+    /**
+     * Set next player to active player
+     *
+     * @return \Match
+     */
+    public function setNextPlayerActive()
+    {
+        $games = $this->getGames();
+        $nextPlayer = $currentPlayer = $this->getCurrentPlayer();
+        $count = 0;
+
+        foreach ($games as $game) {
+            if ($game->getId() == $currentPlayer && !empty($games[$count+1])) {
+                $nextPlayer = $games[$count+1]->getId();
+                break;
+            } elseif ($game->getId() == $currentPlayer && $count = count($games)) {
+                $nextPlayer = $games[0]->getId();
+                break;
+            } elseif ($game->getId() == $currentPlayer && !empty($games[$count-1])) {
+                $nextPlayer = $games[$count-1]->getId();
+                break;
+            }
+            $count++;
+        }
+        $this->setCurrentPlayer($nextPlayer);
+        return $this;
+    }
 }
