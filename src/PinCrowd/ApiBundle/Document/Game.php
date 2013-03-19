@@ -34,11 +34,6 @@ class Game
     protected $match;
     /**
      * @var
-     * @MongoDB\ReferenceOne(targetDocument="User")
-     */
-    protected $user;
-    /**
-     * @var
      * @MongoDB\Field(type="string")
      */
     protected $username;
@@ -74,102 +69,6 @@ class Game
     protected $active;
 
 
-    /**
-     * @param $value
-     *
-     * @return int
-     */
-    protected function getValue($value)
-    {
-        if(in_array($value, array('X','/'))){
-            return 10;
-        } else {
-            return $value;
-        }
-    }
-
-    /**
-     * @param $throws
-     *
-     * @return array
-     */
-    protected function buildFrames($throws)
-    {
-        $f = 0;
-        for ($i = 0; $i < count($throws); $i++) {
-            $score = null;
-            ++$f;
-            if($f < 10){
-                if($throws[$i] == 'X'){
-                    if(isset($throws[$i + 1]) && isset($throws[$i + 2])){
-                        $score = 10 + $this->getValue($throws[$i + 1]);
-                        if($throws[$i + 2] == 'X'){
-                            $score = $score + $this->getValue($throws[$i + 2]);
-                        }
-                        elseif($throws[$i + 1] != 'X'){
-                            $score = $score + ($this->getValue($throws[$i + 2]) - $this->getValue($throws[$i + 1]));
-                        } else {
-                            $score = $score + $this->getValue($throws[$i + 2]) ;
-                        }
-                        $frames[$f] = array(
-                            'frame' => $f,
-                            'throw' => array('X'),
-                            'score' => $score
-                        );
-                    }
-                } else {
-                    $throw = array($throws[$i]);
-                    if(isset($throws[$i + 1])){
-                        array_push($throw,$throws[$i + 1]);
-                    }
-                    if($throws[$i + 1] == '/' && isset($throws[$i + 2])){
-                        $score = 10 + $this->getValue($throws[$i + 2]);
-                    } elseif(isset($throws[$i + 1])) {
-                        $score = $this->getValue($throws[$i + 1]);
-                    }
-                    $frames[$f] = array(
-                        'frame' => $f,
-                        'throw' => $throw,
-                        'score' => $score
-                    );
-                    ++$i;
-                }
-            } elseif($f == 10){
-                $throw = array($throws[$i]);
-                if(isset($throws[$i + 1])){
-                    array_push($throw,$throws[$i + 1]);
-                }
-                if(isset($throws[$i + 2])){
-                    array_push($throw,$throws[$i + 2]);
-                }
-                if(isset($throws[$i + 1]) && isset($throws[$i + 2])){
-                    $score = 10 + $this->getValue($throws[$i + 1]) + $this->getValue($throws[$i + 2]);
-                }
-                $frames[$f] = array(
-                    'frame' => $f,
-                    'throw' => $throw,
-                    'score' => $score
-                );
-            }
-        }
-        return $frames;
-    }
-    /**
-     *
-     */
-    public function calculateScore()
-    {
-        $total = 0;
-        $throws = $this->throws;
-        $frames = $this->buildFrames($throws);
-        foreach ($frames as $key => $frame) {
-            $total = $total + $frame['score'];
-            $frames[$key]['total'] = $total;
-        }
-        $this->params['frames'] = $frames;
-        $this->params['total'] = $total;
-    }
-
     public function __construct()
     {
         $this->constructFrames();
@@ -199,10 +98,120 @@ class Game
                     'pinfall' => null
                 );
             }
-            $this->addFrames($frame, $i);
+            $this->addFrames($frame);
         }
         return $this;
     }
+
+    /**
+     * @param $value
+     *
+     * @return int
+     */
+    protected function getValue($value)
+    {
+        if(in_array($value, array('X','/'))){
+            return 10;
+        } else {
+            return $value;
+        }
+    }
+
+    /**
+     * @param $throws
+     *
+     * @return array
+     */
+    public function buildFrames()
+    {
+        $throws = $this->throws;
+        $frame = $totalScore = $this->score = 0;
+        for ($i = 0; $i < count($throws); $i++) {
+            $score = null;
+            ++$frame;
+            if($frame < 10){
+                if($throws[$i] == 'X'){
+                    if(isset($throws[$i + 1]) && isset($throws[$i + 2])){
+                        $score = 10 + $this->getValue($throws[$i + 1]);
+                        if($throws[$i + 2] == 'X'){
+                            $score = $score + $this->getValue($throws[$i + 2]);
+                        }
+                        elseif($throws[$i + 1] != 'X'){
+                            $score = $score + ($this->getValue($throws[$i + 2]));
+                        } else {
+                            $score = $score + $this->getValue($throws[$i + 2]) ;
+                        }
+                        $frames[$frame] = array(
+                            'throws' => array('X'),
+                            'score' => $score,
+                            'total' => $this->score + $score
+                        );
+                    } else {
+                        $frames[$frame] = array(
+                            'throws' => array('X'),
+                            'score' => '',
+                            'total' => $this->score + $score
+                        );
+                    }
+                    $this->setActive(false);
+                } else {
+                    $throw = array($throws[$i]);
+                    if(isset($throws[$i + 1])){
+                        array_push($throw,$throws[$i + 1]);
+                    }
+                    if(isset($throws[$i + 1]) && $throws[$i + 1] == '/' && isset($throws[$i + 2])){
+                        $score = 10 + $this->getValue($throws[$i + 2]);
+                        $this->setActive(false);
+                    } elseif(isset($throws[$i + 1]) && $throws[$i + 1] == '/' && !isset($throws[$i + 2])){
+                        $score = '';
+                    } elseif(isset($throws[$i + 1])) {
+                        $score = $this->getValue($throws[$i]) + $this->getValue($throws[$i + 1]);
+                        $this->setActive(false);
+                    } else {
+                        $score = '';
+                    }
+                    $frames[$frame] = array(
+                        'throws' => $throw,
+                        'score' => $score,
+                        'total' => $this->score + $score
+                    );
+                    ++$i;
+                }
+            } elseif($frame == 10){
+                $throw = array($throws[$i]);
+                if(isset($throws[$i + 1])){
+                    array_push($throw,$throws[$i + 1]);
+                }
+                if(isset($throws[$i + 2])){
+                    array_push($throw,$throws[$i + 2]);
+                }
+                if(isset($throws[$i + 1]) && isset($throws[$i + 2])){
+                    $score = 10 + $this->getValue($throws[$i + 1]) + $this->getValue($throws[$i + 2]);
+                    $this->setActive(false);
+                }
+                $frames[$frame] = array(
+                    'throws' => $throw,
+                    'score' => $score,
+                    'total' => $this->score + $score
+                );
+            }
+            $this->score += $score;
+        }
+        return $frames;
+    }
+    /**
+     *
+     */
+    public function calculateScore()
+    {
+        $frames = $this->buildFrames();
+        $this->frames = $frames;
+        return array(
+            'score' => $this->score,
+            'frames' => $this->frames
+        );
+    }
+
 
     /**
      * Edit Score
@@ -264,28 +273,6 @@ class Game
     }
 
     /**
-     * Set user
-     *
-     * @param Pincrowd\ApiBundle\Document\User $user
-     * @return \Game
-     */
-    public function setUser(\Pincrowd\ApiBundle\Document\User $user)
-    {
-        $this->user = $user;
-        return $this;
-    }
-
-    /**
-     * Get user
-     *
-     * @return Pincrowd\ApiBundle\Document\User $user
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
      * Set username
      *
      * @param string $username
@@ -312,9 +299,9 @@ class Game
      *
      * @param $frames
      */
-    public function addFrames($frames, $i)
+    public function addFrames($frames)
     {
-        $this->frames[$i] = $frames;
+        $this->frames[] = $frames;
     }
 
     /**
