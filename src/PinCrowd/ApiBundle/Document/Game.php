@@ -93,13 +93,14 @@ class Game
      *
      * @return array
      */
-    protected function buildFrames($throws)
+    public function buildFrames()
     {
-        $f = 0;
+        $throws = $this->throws;
+        $frame = $totalScore = $this->score = 0;
         for ($i = 0; $i < count($throws); $i++) {
             $score = null;
-            ++$f;
-            if($f < 10){
+            ++$frame;
+            if($frame < 10){
                 if($throws[$i] == 'X'){
                     if(isset($throws[$i + 1]) && isset($throws[$i + 2])){
                         $score = 10 + $this->getValue($throws[$i + 1]);
@@ -107,68 +108,74 @@ class Game
                             $score = $score + $this->getValue($throws[$i + 2]);
                         }
                         elseif($throws[$i + 1] != 'X'){
-                            $score = $score + ($this->getValue($throws[$i + 2]) - $this->getValue($throws[$i + 1]));
+                            $score = $score + ($this->getValue($throws[$i + 2]));
                         } else {
                             $score = $score + $this->getValue($throws[$i + 2]) ;
                         }
-                        $frames[$f] = array(
-                            'frame' => $f,
-                            'throw' => array('X'),
-                            'score' => $score
-                        );
+                        $this->frames[$frame]['throw1']['value'] = 'X';
+                        $this->frames[$frame]['throw2']['value'] = '';
+                        $this->frames[$frame]['score'] = $score;
+                        $this->frames[$frame]['total'] = $this->score + $score;
+                    } else {
+                        $this->frames[$frame]['throw1']['value'] = 'X';
+                        $this->frames[$frame]['throw2']['value'] = '';
+                        $this->frames[$frame]['score'] = '';
+                        $this->frames[$frame]['total'] = $this->score + $score;
                     }
+                    $this->setActive(false);
                 } else {
-                    $throw = array($throws[$i]);
-                    if(isset($throws[$i + 1])){
-                        array_push($throw,$throws[$i + 1]);
-                    }
-                    if($throws[$i + 1] == '/' && isset($throws[$i + 2])){
+                    if(isset($throws[$i + 1]) && $throws[$i + 1] == '/' && isset($throws[$i + 2])){
                         $score = 10 + $this->getValue($throws[$i + 2]);
+                        $this->setActive(false);
+                    } elseif(isset($throws[$i + 1]) && $throws[$i + 1] == '/' && !isset($throws[$i + 2])){
+                        $score = '';
                     } elseif(isset($throws[$i + 1])) {
-                        $score = $this->getValue($throws[$i + 1]);
+                        $score = $this->getValue($throws[$i]) + $this->getValue($throws[$i + 1]);
+                        $this->setActive(false);
+                    } else {
+                        $score = '';
                     }
-                    $frames[$f] = array(
-                        'frame' => $f,
-                        'throw' => $throw,
-                        'score' => $score
-                    );
+                    $this->frames[$frame]['throw1']['value'] = $throws[$i];
+                    if (isset($throws[$i + 1])) {
+                        $this->frames[$frame]['throw2']['value'] = $throws[$i + 1];
+                    }
+                    $this->frames[$frame]['score'] = $score;
+                    $this->frames[$frame]['total'] = $this->score + $score;
                     ++$i;
                 }
-            } elseif($f == 10){
-                $throw = array($throws[$i]);
-                if(isset($throws[$i + 1])){
-                    array_push($throw,$throws[$i + 1]);
-                }
-                if(isset($throws[$i + 2])){
-                    array_push($throw,$throws[$i + 2]);
-                }
+            } elseif($frame == 10){
                 if(isset($throws[$i + 1]) && isset($throws[$i + 2])){
                     $score = 10 + $this->getValue($throws[$i + 1]) + $this->getValue($throws[$i + 2]);
+                    $this->setActive(false);
                 }
-                $frames[$f] = array(
-                    'frame' => $f,
-                    'throw' => $throw,
-                    'score' => $score
-                );
+
+                $this->frames[$frame]['throw1']['value'] = $throws[$i];
+                if (isset($throws[$i + 1])) {
+                    $this->frames[$frame]['throw2']['value'] = $throws[$i + 1];
+                }
+                if (isset($throws[$i + 2])) {
+                    $this->frames[$frame]['throw3']['value'] = $throws[$i + 2];
+                }
+                $this->frames[$frame]['score'] = $score;
+                $this->frames[$frame]['total'] = $this->score + $score;
             }
+            $this->score += $score;
         }
-        return $frames;
     }
+
+
     /**
      *
      */
     public function calculateScore()
     {
-        $total = 0;
-        $throws = $this->throws;
-        $frames = $this->buildFrames($throws);
-        foreach ($frames as $key => $frame) {
-            $total = $total + $frame['score'];
-            $frames[$key]['total'] = $total;
-        }
-        $this->params['frames'] = $frames;
-        $this->params['total'] = $total;
+        $this->buildFrames();
+        return array(
+            'score' => $this->score,
+            'frames' => $this->frames
+        );
     }
+
 
     public function __construct()
     {
@@ -334,7 +341,12 @@ class Game
      */
     public function addThrows($throws)
     {
-        $this->throws[] = $throws;
+        if (!is_array($throws)) {
+            $throws = array($throws);
+        }
+        foreach ($throws as $throw) {
+            $this->throws[] = $throw;
+        }
     }
 
     /**
